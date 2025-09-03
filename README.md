@@ -142,6 +142,7 @@ The `Collection` class provides the following methods:
 - `chunk(size)` - Split collection into smaller chunks
 - `reverse()` - Return a new collection with items in reverse order
 - `clone()` - Return a new collection with the same items
+- `take(count)` - Return a new collection with the specified number of items (positive: from beginning, negative: from end)
 - `remove(target)` - Remove all items that match the target element or predicate (modifies collection in-place)
 - `remove_one(target)` - Remove the first occurrence of an item that matches the target element or predicate (modifies collection in-place)
 - `dump_me()` - Debug method to print collection contents (doesn't stop execution)
@@ -180,6 +181,10 @@ reversed_numbers = numbers.reverse()
 
 # Cloning the collection
 cloned_numbers = numbers.clone()  # Create a copy with the same items
+
+# Taking items from the collection
+first_two = numbers.take(2)  # Take first 2 items
+last_three = numbers.take(-3)  # Take last 3 items
 
 # Removing elements
 numbers.remove(1)  # Remove all occurrences of 1

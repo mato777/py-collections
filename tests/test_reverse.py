@@ -1,4 +1,5 @@
 import pytest
+
 from py_collections.collection import Collection
 
 

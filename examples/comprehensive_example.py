@@ -22,7 +22,7 @@ def main():
     strings.append("cherry")
     empty.append("first item")
 
-    # 3. First, last, after, filter, first_or_raise, chunk, and dump_me operations
+    # 3. First, last, after, filter, first_or_raise, chunk, take, and dump_me operations
 
     # First with predicate examples
 
@@ -33,6 +33,11 @@ def main():
     # Filter examples
     numbers.filter(lambda x: x % 2 == 0)
     strings.filter(lambda s: len(s) > 5)
+
+    # Take examples
+    numbers.take(3)  # Take first 3 items
+    numbers.take(-2)  # Take last 2 items
+    strings.take(1)  # Take first item
 
     # First_or_raise examples
 

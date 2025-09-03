@@ -61,6 +61,30 @@ class Collection[T]:
         """
         return Collection(self._items.copy())
 
+    def take(self, count: int) -> "Collection[T]":
+        """
+        Return a new collection with the specified number of items.
+
+        Args:
+            count: The number of items to take. If positive, takes from the beginning.
+                   If negative, takes from the end. If count exceeds the collection size,
+                   returns all available items.
+
+        Returns:
+            A new Collection containing the specified number of items.
+
+        Examples:
+            collection = Collection([1, 2, 3, 4, 5])
+            collection.take(2).all()  # [1, 2]
+            collection.take(-2).all()  # [4, 5]
+            collection.take(10).all()  # [1, 2, 3, 4, 5] (all items)
+        """
+        if not self._items:
+            return Collection()
+
+        taken_items = self._items[:count] if count >= 0 else self._items[count:]
+        return Collection(taken_items)
+
     def remove(self, target: T | Callable[[T], bool]) -> None:
         """
         Remove all items that match the target element or predicate.
