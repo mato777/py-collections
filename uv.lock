@@ -227,6 +227,7 @@ dev = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "pytest-cov" },
     { name = "taskipy" },
 ]
 
@@ -243,7 +244,10 @@ requires-dist = [
 provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "taskipy", specifier = ">=1.14.1" }]
+dev = [
+    { name = "pytest-cov", specifier = ">=6.2.1" },
+    { name = "taskipy", specifier = ">=1.14.1" },
+]
 
 [[package]]
 name = "pydantic"

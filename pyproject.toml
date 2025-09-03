@@ -108,6 +108,47 @@ known-first-party = ["py_collections"]
 "tests/**/*" = ["E501"]
 "examples/**/*" = ["E501"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+
+[tool.coverage.run]
+source = ["src/py_collections"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+show_missing = true
+precision = 2
+
 [tool.ruff.format]
 # Like Black, use double quotes for strings.
 quote-style = "double"
@@ -123,6 +164,7 @@ line-ending = "auto"
 
 [dependency-groups]
 dev = [
+    "pytest-cov>=6.2.1",
     "taskipy>=1.14.1",
 ]
 
@@ -134,5 +176,6 @@ format-check = "ruff format --check ."
 lint = "ruff check . && ruff format --check ."
 test = "pytest"
 test-verbose = "pytest -v"
-test-coverage = "pytest --cov=src/py_collections"
+test-coverage = "pytest --cov=src/py_collections --cov-report=term-missing"
+test-coverage-html = "pytest --cov=src/py_collections --cov-report=html --cov-report=term-missing"
 all = "ruff check . && ruff format --check . && pytest"

@@ -460,3 +460,7 @@ class TestCollectionMap:
         assert "'b'" in result
         assert "Collection([1, 2])" in result
         assert "Collection([3])" in result
+
+        # Test __repr__ method
+        repr_result = repr(cmap)
+        assert repr_result == result  # __repr__ should return the same as __str__

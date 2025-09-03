@@ -43,7 +43,12 @@ uv run pytest -v
 
 To run tests with coverage:
 ```bash
-uv run pytest --cov=src/py_collections
+uv run pytest --cov=src/py_collections --cov-report=term-missing
+```
+
+To generate HTML coverage report:
+```bash
+uv run pytest --cov=src/py_collections --cov-report=html --cov-report=term-missing
 ```
 
 To run a specific test file:
@@ -68,6 +73,7 @@ If you have taskipy installed globally (`pip install taskipy`):
 - **Run tests**: `task test`
 - **Run tests with verbose output**: `task test-verbose`
 - **Run tests with coverage**: `task test-coverage`
+- **Run tests with HTML coverage report**: `task test-coverage-html`
 - **Run all checks**: `task lint`
 - **Run linting, formatting, and tests**: `task all`
 
@@ -79,6 +85,7 @@ If you don't have taskipy installed globally, use:
 - **Run tests**: `uv run python -c "from taskipy import cli; cli.main()" test`
 - **Run tests with verbose output**: `uv run python -c "from taskipy import cli; cli.main()" test-verbose`
 - **Run tests with coverage**: `uv run python -c "from taskipy import cli; cli.main()" test-coverage`
+- **Run tests with HTML coverage report**: `uv run python -c "from taskipy import cli; cli.main()" test-coverage-html`
 - **Run all checks**: `uv run python -c "from taskipy import cli; cli.main()" lint`
 - **Run linting, formatting, and tests**: `uv run python -c "from taskipy import cli; cli.main()" all`
 
@@ -103,7 +110,7 @@ py-collections/
 
 - Enhanced collection types with additional utility methods
 - Type-safe implementations
-- Comprehensive test coverage
+- **100% test coverage** - All code paths tested
 - Modern Python features (3.13+)
 - Specialized `CollectionMap` for working with grouped data
 - Code quality tools: Ruff (linting + formatting), MyPy (type checking)
