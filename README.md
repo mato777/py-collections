@@ -1,6 +1,6 @@
 # py-collections
 
-A Python collections library providing enhanced collection types with additional functionality.
+A Python collections library providing enhanced collection types with additional functionality, built using a modular mixin architecture.
 
 ## Development Setup
 
@@ -53,7 +53,13 @@ uv run pytest --cov=src/py_collections --cov-report=html --cov-report=term-missi
 
 To run a specific test file:
 ```bash
-uv run pytest tests/test_first.py
+uv run pytest tests/core/test_init.py
+```
+
+To run tests for a specific mixin:
+```bash
+uv run pytest tests/mixins/basic_operations/
+uv run pytest tests/mixins/transformation/
 ```
 
 To run tests in watch mode (re-runs on file changes):
@@ -100,16 +106,61 @@ If you don't have taskipy installed globally, use:
 ```
 py-collections/
 ├── src/py_collections/     # Main package source code
-├── tests/                  # Test files
+│   ├── collection.py       # Main Collection class (combines all mixins)
+│   ├── collection_map.py   # CollectionMap class
+│   └── mixins/            # Modular mixin classes
+│       ├── basic_operations.py    # append, extend, all, len, iteration
+│       ├── element_access.py     # first, last, exists, first_or_raise
+│       ├── navigation.py         # after, before
+│       ├── transformation.py    # map, pluck, filter, reverse, clone
+│       ├── grouping.py          # group_by, chunk
+│       ├── removal.py           # remove, remove_one
+│       └── utility.py           # take, dump_me, dump_me_and_die
+├── tests/                  # Test files organized by functionality
+│   ├── core/              # Core Collection tests
+│   ├── collection_map/    # CollectionMap tests
+│   └── mixins/           # Tests organized by mixin
+│       ├── basic_operations/
+│       ├── element_access/
+│       ├── navigation/
+│       ├── transformation/
+│       ├── grouping/
+│       ├── removal/
+│       └── utility/
 ├── examples/               # Example usage and demonstrations
 ├── pyproject.toml         # Project configuration and dependencies
 └── README.md              # This file
 ```
 
+## Architecture
+
+The library uses a **mixin-based architecture** to provide modular, maintainable code:
+
+### Mixin Classes
+
+Each mixin provides a focused set of related functionality:
+
+- **BasicOperationsMixin**: Core collection operations (append, extend, all, len, iteration)
+- **ElementAccessMixin**: Element retrieval and existence checking (first, last, exists, first_or_raise)
+- **NavigationMixin**: Relative element access (after, before)
+- **TransformationMixin**: Data transformation operations (map, pluck, filter, reverse, clone)
+- **GroupingMixin**: Data grouping and chunking (group_by, chunk)
+- **RemovalMixin**: Element removal operations (remove, remove_one)
+- **UtilityMixin**: Utility and debugging methods (take, dump_me, dump_me_and_die)
+
+### Benefits of This Architecture
+
+1. **Modularity**: Each mixin focuses on a specific domain of functionality
+2. **Maintainability**: Changes to one area don't affect others
+3. **Testability**: Tests are organized by functionality
+4. **Extensibility**: New functionality can be added as new mixins
+5. **Reusability**: Mixins can be used independently if needed
+
 ## Features
 
 - Enhanced collection types with additional utility methods
-- Type-safe implementations
+- **Modular mixin architecture** for maintainable code
+- Type-safe implementations with full generic support
 - **100% test coverage** - All code paths tested
 - Modern Python features (3.13+)
 - Specialized `CollectionMap` for working with grouped data
@@ -117,36 +168,42 @@ py-collections/
 
 ## Available Methods
 
-The `Collection` class provides the following methods:
+The `Collection` class provides the following methods, organized by mixin:
 
-### Basic Operations
+### Basic Operations (BasicOperationsMixin)
 - `append(item)` - Add an item to the collection
 - `extend(items)` - Add multiple items from a list or another collection
 - `all()` - Get all items as a list
 - `len()` - Get the number of items
 - **Iteration** - Use in `for` loops and with built-in functions like `sum()`, `max()`, `min()`, `any()`, `all()`, etc.
 
-### Element Access
+### Element Access (ElementAccessMixin)
 - `first(predicate=None)` - Get the first element (optionally matching a predicate)
 - `first_or_raise(predicate=None)` - Get the first element or raise exception if not found
 - `last()` - Get the last element
 - `exists(predicate=None)` - Check if an element exists (returns boolean)
 
-### Navigation
+### Navigation (NavigationMixin)
 - `after(target)` - Get the element after a target element or predicate match
 - `before(target)` - Get the element before a target element or predicate match
 
-### Collection Operations
+### Transformation (TransformationMixin)
 - `filter(predicate)` - Filter elements based on a predicate
 - `map(func)` - Apply a function to every item and return a new collection with the results
 - `pluck(key, value_key=None)` - Extract values from items based on a key or attribute (inspired by Laravel)
-- `group_by(key)` - Group items by a key or callback function
-- `chunk(size)` - Split collection into smaller chunks
 - `reverse()` - Return a new collection with items in reverse order
 - `clone()` - Return a new collection with the same items
-- `take(count)` - Return a new collection with the specified number of items (positive: from beginning, negative: from end)
+
+### Grouping (GroupingMixin)
+- `group_by(key)` - Group items by a key or callback function
+- `chunk(size)` - Split collection into smaller chunks
+
+### Removal (RemovalMixin)
 - `remove(target)` - Remove all items that match the target element or predicate (modifies collection in-place)
 - `remove_one(target)` - Remove the first occurrence of an item that matches the target element or predicate (modifies collection in-place)
+
+### Utility (UtilityMixin)
+- `take(count)` - Return a new collection with the specified number of items (positive: from beginning, negative: from end)
 - `dump_me()` - Debug method to print collection contents (doesn't stop execution)
 - `dump_me_and_die()` - Debug method to print collection contents and stop execution
 
