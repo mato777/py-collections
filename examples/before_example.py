@@ -6,7 +6,7 @@ The before method returns the element that comes before the first occurrence
 of the target element or predicate match.
 """
 
-from py_collections.collection import Collection
+from py_collections import Collection
 
 
 def main():

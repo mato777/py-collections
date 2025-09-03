@@ -6,7 +6,7 @@ This example shows how to use the after method to find the element
 that comes after a specific element or predicate match.
 """
 
-from py_collections.collection import Collection
+from py_collections import Collection
 
 
 def main():

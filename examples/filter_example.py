@@ -6,7 +6,7 @@ This example shows how to use the filter method to create new collections
 with elements that satisfy a predicate function.
 """
 
-from py_collections.collection import Collection
+from py_collections import Collection
 
 
 def main():

@@ -46,6 +46,21 @@ class Collection(Generic[T]):
         index = self._find_first_index(predicate)
         return self._items[index] if index is not None else None
     
+    def exists(self, predicate: Callable[[T], bool] = None) -> bool:
+        """
+        Check if an element exists in the collection.
+        
+        Args:
+            predicate: Optional callable that takes an item and returns a boolean.
+                      If provided, checks if any element satisfies the predicate.
+                      If None, checks if the collection is not empty.
+        
+        Returns:
+            True if an element exists that satisfies the predicate (or if collection is not empty when no predicate),
+            False otherwise.
+        """
+        return self._find_first_index(predicate) is not None
+    
     def _find_first_index(self, predicate: Callable[[T], bool] = None) -> int | None:
         """
         Find the index of the first element that satisfies the predicate.
@@ -182,6 +197,61 @@ class Collection(Generic[T]):
         filtered_items = [item for item in self._items if predicate(item)]
         return Collection(filtered_items)
     
+    def group_by(self, key: str | Callable[[T], Any] = None) -> dict[Any, 'Collection[T]']:
+        """
+        Group the collection's items by a given key or callback function.
+        
+        Args:
+            key: Either a string representing an attribute/key to group by,
+                 or a callable that takes an item and returns the grouping key.
+                 If None, groups by the item itself.
+        
+        Returns:
+            A dictionary where keys are the grouping values and values are Collection
+            instances containing the grouped items.
+            
+        Examples:
+            # Group by attribute
+            users.group_by('department')
+            
+            # Group by callback function
+            users.group_by(lambda user: user.age // 10 * 10)  # Group by age decade
+            
+            # Group by item itself
+            numbers.group_by()  # Groups identical numbers together
+        """
+        if not self._items:
+            return {}
+        
+        grouped = {}
+        
+        for item in self._items:
+            if key is None:
+                # Group by the item itself
+                group_key = item
+            elif isinstance(key, str):
+                # Group by attribute/key (for dictionaries or objects)
+                if isinstance(item, dict):
+                    group_key = item.get(key)
+                else:
+                    group_key = getattr(item, key, None)
+            elif callable(key):
+                # Group by callback function
+                group_key = key(item)
+            else:
+                raise ValueError("Key must be a string, callable, or None")
+            
+            # Convert key to hashable type for dictionary keys
+            if isinstance(group_key, (list, dict, set)):
+                group_key = str(group_key)
+            
+            if group_key not in grouped:
+                grouped[group_key] = Collection()
+            
+            grouped[group_key].append(item)
+        
+        return grouped
+    
     def chunk(self, size: int) -> List['Collection[T]']:
         """
         Split the collection into smaller collections of the specified size.
@@ -212,16 +282,15 @@ class Collection(Generic[T]):
     
     def dump_me(self) -> None:
         """
-        Stop execution and print all elements in the collection for debugging.
+        Print all elements in the collection for debugging without stopping execution.
         
         This method is useful for debugging purposes. It will:
         1. Print the collection's string representation
         2. Print each element individually with its index
         3. Print the total number of elements
-        4. Stop execution by raising a SystemExit exception
         
-        Raises:
-            SystemExit: Always raises this exception to stop execution.
+        Returns:
+            None
         """
         print(f"\n=== Collection Dump ===")
         print(f"Collection: {self}")
@@ -236,6 +305,21 @@ class Collection(Generic[T]):
                 print(f"  [{i}]: {item} (type: {type(item).__name__})")
         
         print(f"=== End Collection Dump ===\n")
+    
+    def dump_me_and_die(self) -> None:
+        """
+        Print all elements in the collection for debugging and stop execution.
+        
+        This method is useful for debugging purposes. It will:
+        1. Print the collection's string representation
+        2. Print each element individually with its index
+        3. Print the total number of elements
+        4. Stop execution by raising a SystemExit exception
+        
+        Raises:
+            SystemExit: Always raises this exception to stop execution.
+        """
+        self.dump_me()
         raise SystemExit("Collection dump completed - execution stopped")
     
     def last(self) -> T:
@@ -264,6 +348,15 @@ class Collection(Generic[T]):
     def __len__(self) -> int:
         """Return the number of items in the collection."""
         return len(self._items)
+    
+    def __iter__(self):
+        """
+        Return an iterator over the collection's items.
+        
+        Returns:
+            An iterator that yields each item in the collection.
+        """
+        return iter(self._items)
     
     def __str__(self) -> str:
         """Return a string representation of the collection."""

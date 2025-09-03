@@ -39,6 +39,7 @@ def main():
         "append_example.py", 
         "first_last_example.py",
         "first_with_predicate_example.py",
+        "exists_example.py",
         "all_example.py",
         "generic_types_example.py",
         "edge_cases_example.py",

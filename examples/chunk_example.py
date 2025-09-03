@@ -5,7 +5,7 @@ Example demonstrating the chunk method of the Collection class.
 The chunk method splits a collection into smaller collections of the specified size.
 """
 
-from py_collections.collection import Collection
+from py_collections import Collection
 
 
 def main():

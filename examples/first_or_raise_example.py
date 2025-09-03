@@ -6,7 +6,7 @@ This example shows how to use the first_or_raise method to get the first element
 or raise an ItemNotFoundException when no element is found.
 """
 
-from py_collections.collection import Collection, ItemNotFoundException
+from py_collections import Collection, ItemNotFoundException
 
 
 def main():

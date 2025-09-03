@@ -18,6 +18,10 @@ This project uses [uv](https://github.com/astral-sh/uv) for dependency managemen
    ```bash
    uv sync
    ```
+3. Install the package in development mode (for running examples):
+   ```bash
+   uv pip install -e .
+   ```
 
 ### Running Tests
 
@@ -70,6 +74,102 @@ py-collections/
 - Type-safe implementations
 - Comprehensive test coverage
 - Modern Python features (3.13+)
+- Specialized `CollectionMap` for working with grouped data
+
+## Available Methods
+
+The `Collection` class provides the following methods:
+
+### Basic Operations
+- `append(item)` - Add an item to the collection
+- `all()` - Get all items as a list
+- `len()` - Get the number of items
+- **Iteration** - Use in `for` loops and with built-in functions like `sum()`, `max()`, `min()`, `any()`, `all()`, etc.
+
+### Element Access
+- `first(predicate=None)` - Get the first element (optionally matching a predicate)
+- `first_or_raise(predicate=None)` - Get the first element or raise exception if not found
+- `last()` - Get the last element
+- `exists(predicate=None)` - Check if an element exists (returns boolean)
+
+### Navigation
+- `after(target)` - Get the element after a target element or predicate match
+- `before(target)` - Get the element before a target element or predicate match
+
+### Collection Operations
+- `filter(predicate)` - Filter elements based on a predicate
+- `group_by(key)` - Group items by a key or callback function
+- `chunk(size)` - Split collection into smaller chunks
+- `dump_me()` - Debug method to print collection contents (doesn't stop execution)
+- `dump_me_and_die()` - Debug method to print collection contents and stop execution
+
+### CollectionMap Class
+A specialized map that stores `Collection` instances as values, providing convenient methods for working with grouped data:
+- Dictionary-like interface with string keys and Collection values
+- Automatic conversion of lists/items to Collection instances
+- `get(key)` - Returns empty Collection if key doesn't exist (no KeyError)
+- `add(key, items)` - Add items to existing key or create new key
+- `flatten()` - Combine all collections into one
+- `map(func)` - Apply function to each collection
+- `filter(predicate)` - Filter collections based on criteria
+- `filter_by_size(min_size, max_size)` - Filter by collection size
+- `total_items()` - Get total count across all collections
+- `largest_group()` / `smallest_group()` - Find groups by size
+- `group_sizes()` - Get size of each group
+
+### Usage Examples
+
+```python
+from py_collections import Collection
+
+# Basic usage
+numbers = Collection([1, 2, 3, 4, 5])
+numbers.append(6)
+
+# Check if elements exist
+if numbers.exists(lambda x: x > 3):
+    print("Found number greater than 3")
+
+# Find elements
+first_even = numbers.first(lambda x: x % 2 == 0)
+after_three = numbers.after(3)
+
+# Filter and chunk
+evens = numbers.filter(lambda x: x % 2 == 0)
+chunks = numbers.chunk(2)
+
+# Group by
+users = Collection([{"name": "Alice", "dept": "Eng"}, {"name": "Bob", "dept": "Sales"}])
+by_dept = users.group_by("dept")
+by_parity = numbers.group_by(lambda x: "even" if x % 2 == 0 else "odd")
+
+# Iteration
+for item in numbers:
+    print(item)
+
+# List comprehension
+doubled = [item * 2 for item in numbers]
+
+# Built-in functions
+total = sum(item for item in numbers)
+has_even = any(item % 2 == 0 for item in numbers)
+
+# CollectionMap usage
+from py_collections import CollectionMap
+
+# Create from group_by result
+grouped = users.group_by("department")
+cmap = CollectionMap(grouped)
+
+# Work with groups
+engineering = cmap["Engineering"]
+all_users = cmap.flatten()
+group_stats = cmap.map(lambda c: len(c))
+
+# Safe access and incremental building
+missing = cmap.get("missing")  # Returns empty Collection
+cmap.add("new_group", [1, 2, 3])  # Creates new group
+cmap.add("existing_group", [4, 5])  # Extends existing group
 
 ## Contributing
 
@@ -82,4 +182,4 @@ py-collections/
 
 ## License
 
-[Add your license information here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
