@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, TypeVar
+from typing import Any, TypeVar, Union
 
 
 class ItemNotFoundException(Exception):
@@ -29,6 +29,77 @@ class Collection[T]:
             item: The item to append to the collection.
         """
         self._items.append(item)
+
+    def extend(self, items: Union[list[T], "Collection[T]"]) -> None:
+        """
+        Extend the collection with items from a list or another collection.
+
+        Args:
+            items: A list or Collection containing items to add to the current collection.
+        """
+        if isinstance(items, Collection):
+            self._items.extend(items._items)
+        else:
+            self._items.extend(items)
+
+    def reverse(self) -> "Collection[T]":
+        """
+        Return a new collection with the items reversed in order.
+
+        Returns:
+            A new Collection containing the items in reverse order.
+        """
+        reversed_items = self._items[::-1]
+        return Collection(reversed_items)
+
+    def clone(self) -> "Collection[T]":
+        """
+        Return a new collection with the same items.
+
+        Returns:
+            A new Collection containing the same items as the original.
+        """
+        return Collection(self._items.copy())
+
+    def remove(self, target: T | Callable[[T], bool]) -> None:
+        """
+        Remove all items that match the target element or predicate.
+
+        Args:
+            target: Either an element to remove, or a callable that takes an item and returns a boolean.
+                   If an element is provided, removes all occurrences of that element.
+                   If a callable is provided, removes all elements that satisfy the predicate.
+        """
+        if callable(target):
+            predicate = target
+            self._items[:] = [item for item in self._items if not predicate(item)]
+        else:
+            self._items[:] = [item for item in self._items if item != target]
+
+    def remove_one(self, target: T | Callable[[T], bool]) -> None:
+        """
+        Remove the first occurrence of an item that matches the target element or predicate.
+
+        Args:
+            target: Either an element to remove, or a callable that takes an item and returns a boolean.
+                   If an element is provided, removes the first occurrence of that element.
+                   If a callable is provided, removes the first element that satisfies the predicate.
+        """
+        if not self._items:
+            return
+
+        if callable(target):
+            predicate = target
+            for i, item in enumerate(self._items):
+                if predicate(item):
+                    del self._items[i]
+                    return
+        else:
+            try:
+                self._items.remove(target)
+            except ValueError:
+                # Element not found, do nothing
+                pass
 
     def first(self, predicate: Callable[[T], bool] | None = None) -> T | None:
         """

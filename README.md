@@ -121,6 +121,7 @@ The `Collection` class provides the following methods:
 
 ### Basic Operations
 - `append(item)` - Add an item to the collection
+- `extend(items)` - Add multiple items from a list or another collection
 - `all()` - Get all items as a list
 - `len()` - Get the number of items
 - **Iteration** - Use in `for` loops and with built-in functions like `sum()`, `max()`, `min()`, `any()`, `all()`, etc.
@@ -139,6 +140,10 @@ The `Collection` class provides the following methods:
 - `filter(predicate)` - Filter elements based on a predicate
 - `group_by(key)` - Group items by a key or callback function
 - `chunk(size)` - Split collection into smaller chunks
+- `reverse()` - Return a new collection with items in reverse order
+- `clone()` - Return a new collection with the same items
+- `remove(target)` - Remove all items that match the target element or predicate (modifies collection in-place)
+- `remove_one(target)` - Remove the first occurrence of an item that matches the target element or predicate (modifies collection in-place)
 - `dump_me()` - Debug method to print collection contents (doesn't stop execution)
 - `dump_me_and_die()` - Debug method to print collection contents and stop execution
 
@@ -164,6 +169,22 @@ from py_collections import Collection
 # Basic usage
 numbers = Collection([1, 2, 3, 4, 5])
 numbers.append(6)
+
+# Extending with multiple items
+numbers.extend([7, 8, 9])
+other_numbers = Collection([10, 11, 12])
+numbers.extend(other_numbers)
+
+# Reversing the collection
+reversed_numbers = numbers.reverse()
+
+# Cloning the collection
+cloned_numbers = numbers.clone()  # Create a copy with the same items
+
+# Removing elements
+numbers.remove(1)  # Remove all occurrences of 1
+numbers.remove(lambda x: x > 3)  # Remove all elements > 3
+numbers.remove_one(lambda x: x == 2)  # Remove first occurrence of 2
 
 # Check if elements exist
 if numbers.exists(lambda x: x > 3):
