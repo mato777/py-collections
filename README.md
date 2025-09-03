@@ -10,6 +10,7 @@ This project uses [uv](https://github.com/astral-sh/uv) for dependency managemen
 
 - Python 3.13+
 - [uv](https://github.com/astral-sh/uv) installed
+- [taskipy](https://github.com/taskipy/taskipy) (optional, for easier command execution)
 
 ### Installation
 
@@ -21,6 +22,11 @@ This project uses [uv](https://github.com/astral-sh/uv) for dependency managemen
 3. Install the package in development mode (for running examples):
    ```bash
    uv pip install -e .
+   ```
+
+4. (Optional) Install taskipy globally for easier command execution:
+   ```bash
+   pip install taskipy
    ```
 
 ### Running Tests
@@ -52,10 +58,35 @@ uv run pytest --watch
 
 ### Development Commands
 
+#### Using taskipy (recommended)
+If you have taskipy installed globally (`pip install taskipy`):
 - **Install dev dependencies**: `uv sync --group dev`
+- **Run linting**: `task check`
+- **Format code**: `task format`
+- **Check formatting**: `task format-check`
+- **Auto-fix linting issues**: `task check-fix`
+- **Run tests**: `task test`
+- **Run tests with verbose output**: `task test-verbose`
+- **Run tests with coverage**: `task test-coverage`
+- **Run all checks**: `task lint`
+- **Run linting, formatting, and tests**: `task all`
+
+If you don't have taskipy installed globally, use:
+- **Run linting**: `uv run python -c "from taskipy import cli; cli.main()" check`
+- **Format code**: `uv run python -c "from taskipy import cli; cli.main()" format`
+- **Check formatting**: `uv run python -c "from taskipy import cli; cli.main()" format-check`
+- **Auto-fix linting issues**: `uv run python -c "from taskipy import cli; cli.main()" check-fix`
+- **Run tests**: `uv run python -c "from taskipy import cli; cli.main()" test`
+- **Run tests with verbose output**: `uv run python -c "from taskipy import cli; cli.main()" test-verbose`
+- **Run tests with coverage**: `uv run python -c "from taskipy import cli; cli.main()" test-coverage`
+- **Run all checks**: `uv run python -c "from taskipy import cli; cli.main()" lint`
+- **Run linting, formatting, and tests**: `uv run python -c "from taskipy import cli; cli.main()" all`
+
+#### Using uv directly
 - **Run linting**: `uv run ruff check .`
 - **Format code**: `uv run ruff format .`
 - **Type checking**: `uv run mypy src/`
+- **Run all checks**: `uv run ruff check . && uv run ruff format --check .`
 
 ## Project Structure
 
@@ -75,6 +106,7 @@ py-collections/
 - Comprehensive test coverage
 - Modern Python features (3.13+)
 - Specialized `CollectionMap` for working with grouped data
+- Code quality tools: Ruff (linting + formatting), MyPy (type checking)
 
 ## Available Methods
 
