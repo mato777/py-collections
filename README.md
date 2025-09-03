@@ -312,6 +312,27 @@ structure = data.to_dict()
 json_ready = data.to_dict(mode="json")
 json_text = data.to_json()
 
+### Pydantic Compatibility
+If your items include Pydantic models, they are supported out of the box:
+
+```python
+from pydantic import BaseModel
+from py_collections import Collection
+
+class User(BaseModel):
+    id: int
+    name: str
+
+users = Collection([User(id=1, name="Alice"), User(id=2, name="Bob")])
+
+# Converts to list of dicts
+users_dict = users.to_dict()
+
+# JSON-ready and stringified
+users_json_ready = users.to_dict(mode="json")
+users_json = users.to_json()
+```
+
 from py_collections import CollectionMap
 
 # Create from group_by result

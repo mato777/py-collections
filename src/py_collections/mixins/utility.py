@@ -130,6 +130,27 @@ class UtilityMixin[T]:
                 data = asdict(value)  # type: ignore
                 return convert(data)
 
+            # Pydantic models (v1 and v2)
+            # Use duck-typing to avoid hard dependency
+            model_dump_fn = getattr(value, "model_dump", None)
+            dict_fn = getattr(value, "dict", None)
+            if callable(model_dump_fn):
+                try:
+                    # In v2, mode="json" ensures JSON-safe primitives when requested
+                    data = (
+                        model_dump_fn(mode="json") if json_mode else model_dump_fn()
+                    )
+                except TypeError:
+                    # Older signatures without mode param
+                    data = model_dump_fn()
+                return convert(data)
+            if callable(dict_fn):
+                try:
+                    data = dict_fn()
+                except TypeError:
+                    data = dict_fn
+                return convert(data)
+
             # Third-party/common types handling in json mode
             if json_mode:
                 try:

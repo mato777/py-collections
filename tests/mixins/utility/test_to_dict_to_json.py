@@ -81,3 +81,23 @@ class TestToDictToJson:
         loaded = json.loads(s)
         assert loaded == c.to_dict(mode="json")
 
+    def test_pydantic_models_if_available(self):
+        try:
+            from pydantic import BaseModel  # type: ignore
+        except Exception:
+            return
+
+        class User(BaseModel):
+            id: int
+            name: str
+
+        c = Collection([User(id=1, name="Alice")])
+        d = c.to_dict()
+        assert d == [{"id": 1, "name": "Alice"}]
+
+        dj = c.to_dict(mode="json")
+        assert dj == [{"id": 1, "name": "Alice"}]
+
+        js = c.to_json()
+        assert json.loads(js) == dj
+
