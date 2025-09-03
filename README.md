@@ -138,6 +138,8 @@ The `Collection` class provides the following methods:
 
 ### Collection Operations
 - `filter(predicate)` - Filter elements based on a predicate
+- `map(func)` - Apply a function to every item and return a new collection with the results
+- `pluck(key, value_key=None)` - Extract values from items based on a key or attribute (inspired by Laravel)
 - `group_by(key)` - Group items by a key or callback function
 - `chunk(size)` - Split collection into smaller chunks
 - `reverse()` - Return a new collection with items in reverse order
@@ -185,6 +187,21 @@ cloned_numbers = numbers.clone()  # Create a copy with the same items
 # Taking items from the collection
 first_two = numbers.take(2)  # Take first 2 items
 last_three = numbers.take(-3)  # Take last 3 items
+
+# Mapping elements
+doubled = numbers.map(lambda x: x * 2)  # Double each number
+squared = numbers.map(lambda x: x ** 2)  # Square each number
+strings = numbers.map(str)  # Convert to strings
+
+# Plucking values from objects/dictionaries
+users = Collection([{"name": "Alice", "age": 25}, {"name": "Bob", "age": 30}])
+names = users.pluck("name")  # ["Alice", "Bob"]
+name_age_pairs = users.pluck("name", "age")  # [{"Alice": 25}, {"Bob": 30}]
+
+# Nested key access with dot notation
+nested_users = Collection([{"name": "Alice", "address": {"city": "NYC"}}, {"name": "Bob", "address": {"city": "LA"}}])
+cities = nested_users.pluck("address.city")  # ["NYC", "LA"]
+name_city_pairs = nested_users.pluck("name", "address.city")  # [{"Alice": "NYC"}, {"Bob": "LA"}]
 
 # Removing elements
 numbers.remove(1)  # Remove all occurrences of 1

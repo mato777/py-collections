@@ -22,7 +22,7 @@ def main():
     strings.append("cherry")
     empty.append("first item")
 
-    # 3. First, last, after, filter, first_or_raise, chunk, take, and dump_me operations
+    # 3. First, last, after, filter, first_or_raise, chunk, take, map, pluck, and dump_me operations
 
     # First with predicate examples
 
@@ -33,6 +33,26 @@ def main():
     # Filter examples
     numbers.filter(lambda x: x % 2 == 0)
     strings.filter(lambda s: len(s) > 5)
+
+    # Map examples
+    numbers.map(lambda x: x * 2)  # Double each number
+    strings.map(str.upper)  # Convert to uppercase
+    numbers.map(str)  # Convert to strings
+
+    # Pluck examples
+    users = Collection([{"name": "Alice", "age": 25}, {"name": "Bob", "age": 30}])
+    users.pluck("name")  # Extract names
+    users.pluck("name", "age")  # Create name-age pairs
+
+    # Nested key examples
+    nested_users = Collection(
+        [
+            {"name": "Alice", "address": {"city": "NYC"}},
+            {"name": "Bob", "address": {"city": "LA"}},
+        ]
+    )
+    nested_users.pluck("address.city")  # Extract nested cities
+    nested_users.pluck("name", "address.city")  # Create name-city pairs
 
     # Take examples
     numbers.take(3)  # Take first 3 items
