@@ -1,6 +1,6 @@
 """Utility mixin for Collection class."""
 
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from py_collections.collection import Collection
 
@@ -77,3 +77,106 @@ class UtilityMixin[T]:
         """
         self.dump_me()
         raise SystemExit("Collection dump completed - execution stopped")
+
+    def to_dict(self, mode: str | None = None) -> list["Any"]:
+        """
+        Return the collection items converted to plain Python structures.
+
+        - Objects are converted to dictionaries (using dataclasses, __dict__, or to_dict if available).
+        - Containers (dict, list, tuple, set) are converted recursively.
+        - If mode == "json", the result is guaranteed to be JSON-serializable
+          (datetimes to ISO strings, Decimals to float, UUIDs to str, sets to lists, etc.).
+
+        Args:
+            mode: When set to "json", ensures the returned structure is JSON-serializable.
+
+        Returns:
+            A list containing the converted items.
+        """
+
+        json_mode = mode == "json"
+
+        def convert(value: "Any") -> "Any":
+            # Primitives
+            if value is None or isinstance(value, (bool, int, float, str)):
+                return value
+
+            # Avoid circular import: import here
+            from ..collection import Collection as _Collection
+
+            # Collections
+            if isinstance(value, _Collection):
+                return [convert(v) for v in value.all()]
+
+            # Built-in containers
+            if isinstance(value, (list, tuple)):
+                return [convert(v) for v in value]
+            if isinstance(value, set):
+                # sets are not JSON-serializable; always convert to list for consistency
+                return [convert(v) for v in value]
+            if isinstance(value, dict):
+                # Convert keys to string in json mode (JSON requires string keys)
+                if json_mode:
+                    return {str(convert(k)): convert(v) for k, v in value.items()}
+                return {convert(k): convert(v) for k, v in value.items()}
+
+            # Dataclasses
+            try:
+                from dataclasses import is_dataclass, asdict  # type: ignore
+            except Exception:  # pragma: no cover - defensive
+                is_dataclass = None  # type: ignore
+                asdict = None  # type: ignore
+            if callable(is_dataclass) and is_dataclass(value):  # type: ignore
+                data = asdict(value)  # type: ignore
+                return convert(data)
+
+            # Third-party/common types handling in json mode
+            if json_mode:
+                try:
+                    import datetime as _dt
+                    import decimal as _decimal
+                    import uuid as _uuid
+                except Exception:  # pragma: no cover - defensive
+                    _dt = None  # type: ignore
+                    _decimal = None  # type: ignore
+                    _uuid = None  # type: ignore
+
+                if _dt and isinstance(value, (_dt.datetime, _dt.date, _dt.time)):
+                    # Use ISO format for JSON
+                    return value.isoformat()
+                if _decimal and isinstance(value, _decimal.Decimal):
+                    # Convert Decimal to float for JSON
+                    return float(value)
+                if _uuid and isinstance(value, _uuid.UUID):
+                    return str(value)
+
+            # Objects exposing to_dict()
+            if hasattr(value, "to_dict") and callable(getattr(value, "to_dict")):
+                try:
+                    return convert(value.to_dict())  # type: ignore
+                except TypeError:
+                    # Some to_dict expect args; fall back to __dict__
+                    pass
+
+            # Fallback: use __dict__ if available, else string representation
+            if hasattr(value, "__dict__"):
+                return {k: convert(v) for k, v in vars(value).items() if not k.startswith("__")}
+
+            # Final fallback: string representation (ensures json serializable when needed)
+            return str(value)
+
+        return [convert(item) for item in self._items]
+
+    def to_json(self) -> str:
+        """
+        Return a JSON string representing the collection items.
+
+        Uses to_dict(mode="json") under the hood and json.dumps to stringify.
+
+        Returns:
+            A JSON-formatted string.
+        """
+
+        import json
+
+        return json.dumps(self.to_dict(mode="json"), ensure_ascii=False)

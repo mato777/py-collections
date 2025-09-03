@@ -206,6 +206,8 @@ The `Collection` class provides the following methods, organized by mixin:
 - `take(count)` - Return a new collection with the specified number of items (positive: from beginning, negative: from end)
 - `dump_me()` - Debug method to print collection contents (doesn't stop execution)
 - `dump_me_and_die()` - Debug method to print collection contents and stop execution
+- `to_dict(mode=None)` - Convert items to plain Python structures. With `mode="json"`, ensures JSON-serializable output (datetimes to ISO strings, Decimals to floats, UUIDs to strings, sets to lists, and dict keys to strings)
+- `to_json()` - Return a JSON string using `to_dict(mode="json")`
 
 ### CollectionMap Class
 A specialized map that stores `Collection` instances as values, providing convenient methods for working with grouped data:
@@ -294,6 +296,22 @@ total = sum(item for item in numbers)
 has_even = any(item % 2 == 0 for item in numbers)
 
 # CollectionMap usage
+# Serialization
+from py_collections import Collection
+
+data = Collection([
+    {"name": "Alice", "age": 30},
+    (1, 2, 3),
+    {"tags": {"python", "collections"}},
+])
+
+# Plain Python structures
+structure = data.to_dict()
+
+# JSON-ready structure and JSON string
+json_ready = data.to_dict(mode="json")
+json_text = data.to_json()
+
 from py_collections import CollectionMap
 
 # Create from group_by result
