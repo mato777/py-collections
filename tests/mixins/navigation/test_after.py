@@ -1,4 +1,4 @@
-from src.py_collections.collection import Collection
+from py_collections.collection import Collection
 
 
 class TestCollectionAfter:

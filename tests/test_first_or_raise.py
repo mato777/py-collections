@@ -1,7 +1,7 @@
 import pytest
 
-from src.py_collections.collection import Collection
-from src.py_collections.mixins.element_access import ItemNotFoundException
+from py_collections.collection import Collection
+from py_collections.mixins.element_access import ItemNotFoundException
 
 
 class TestCollectionFirstOrRaise:

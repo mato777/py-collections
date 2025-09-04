@@ -1,9 +1,10 @@
 """Grouping mixin for Collection class."""
 
 from collections.abc import Callable
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
-from py_collections.collection import Collection
+if TYPE_CHECKING:
+    from py_collections.collection import Collection
 
 T = TypeVar("T")
 

@@ -1,8 +1,9 @@
 """Basic operations mixin for Collection class."""
 
-from typing import Any, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar, Union
 
-from py_collections.collection import Collection
+if TYPE_CHECKING:
+    from py_collections.collection import Collection
 
 T = TypeVar("T")
 
