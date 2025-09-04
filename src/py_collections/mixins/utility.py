@@ -96,6 +96,41 @@ class UtilityMixin[T]:
 
         json_mode = mode == "json"
 
+        # Track objects currently being processed to avoid infinite recursion on cycles
+        processing_ids: set[int] = set()
+        circular_marker = "[Circular]"
+
+        def is_hashable(obj: "Any") -> bool:
+            try:
+                hash(obj)
+            except Exception:
+                return False
+            return True
+
+        def safe_json_key(key: "Any") -> str:
+            # Map keys to JSON-safe strings with best-effort type-aware formatting
+            if key is None:
+                return "null"
+            if isinstance(key, (bool, int, float, str)):
+                return str(key)
+            try:
+                import datetime as _dt  # type: ignore
+                import decimal as _decimal  # type: ignore
+                import uuid as _uuid  # type: ignore
+            except Exception:  # pragma: no cover - defensive
+                _dt = None  # type: ignore
+                _decimal = None  # type: ignore
+                _uuid = None  # type: ignore
+            if _dt and isinstance(key, (_dt.datetime, _dt.date, _dt.time)):
+                return key.isoformat()
+            if _uuid and isinstance(key, _uuid.UUID):
+                return str(key)
+            if _decimal and isinstance(key, _decimal.Decimal):
+                # Keep decimal textual representation to avoid precision loss in keys
+                return str(key)
+            # Fallback: include type name to reduce collision chance
+            return f"<{type(key).__name__}:{repr(key)}>"
+
         def convert(value: "Any") -> "Any":
             # Primitives
             if value is None or isinstance(value, (bool, int, float, str)):
@@ -106,19 +141,55 @@ class UtilityMixin[T]:
 
             # Collections
             if isinstance(value, _Collection):
-                return [convert(v) for v in value.all()]
+                obj_id = id(value)
+                if obj_id in processing_ids:
+                    return circular_marker
+                processing_ids.add(obj_id)
+                try:
+                    return [convert(v) for v in value.all()]
+                finally:
+                    processing_ids.discard(obj_id)
 
             # Built-in containers
             if isinstance(value, (list, tuple)):
-                return [convert(v) for v in value]
+                obj_id = id(value)
+                if obj_id in processing_ids:
+                    return circular_marker
+                processing_ids.add(obj_id)
+                try:
+                    return [convert(v) for v in value]
+                finally:
+                    processing_ids.discard(obj_id)
             if isinstance(value, set):
                 # sets are not JSON-serializable; always convert to list for consistency
-                return [convert(v) for v in value]
+                obj_id = id(value)
+                if obj_id in processing_ids:
+                    return circular_marker
+                processing_ids.add(obj_id)
+                try:
+                    return [convert(v) for v in value]
+                finally:
+                    processing_ids.discard(obj_id)
             if isinstance(value, dict):
-                # Convert keys to string in json mode (JSON requires string keys)
-                if json_mode:
-                    return {str(convert(k)): convert(v) for k, v in value.items()}
-                return {convert(k): convert(v) for k, v in value.items()}
+                obj_id = id(value)
+                if obj_id in processing_ids:
+                    return circular_marker
+                processing_ids.add(obj_id)
+                try:
+                    if json_mode:
+                        result: dict[str, "Any"] = {}
+                        for k, v in value.items():
+                            key_str = safe_json_key(k)
+                            if key_str in result:
+                                raise ValueError(
+                                    "Duplicate key after JSON stringification detected; potential data loss prevented"
+                                )
+                            result[key_str] = convert(v)
+                        return result
+                    # Non-JSON mode: preserve original keys to avoid creating unhashable keys
+                    return {k: convert(v) for k, v in value.items()}
+                finally:
+                    processing_ids.discard(obj_id)
 
             # Dataclasses
             try:
@@ -127,29 +198,54 @@ class UtilityMixin[T]:
                 is_dataclass = None  # type: ignore
                 asdict = None  # type: ignore
             if callable(is_dataclass) and is_dataclass(value):  # type: ignore
-                data = asdict(value)  # type: ignore
-                return convert(data)
+                obj_id = id(value)
+                if obj_id in processing_ids:
+                    return circular_marker
+                processing_ids.add(obj_id)
+                try:
+                    data = asdict(value)  # type: ignore
+                    return convert(data)
+                finally:
+                    processing_ids.discard(obj_id)
 
             # Pydantic models (v1 and v2)
             # Use duck-typing to avoid hard dependency
             model_dump_fn = getattr(value, "model_dump", None)
             dict_fn = getattr(value, "dict", None)
             if callable(model_dump_fn):
+                obj_id = id(value)
+                if obj_id in processing_ids:
+                    return circular_marker
+                processing_ids.add(obj_id)
                 try:
-                    # In v2, mode="json" ensures JSON-safe primitives when requested
-                    data = (
-                        model_dump_fn(mode="json") if json_mode else model_dump_fn()
-                    )
-                except TypeError:
-                    # Older signatures without mode param
-                    data = model_dump_fn()
-                return convert(data)
+                    try:
+                        # In v2, mode="json" ensures JSON-safe primitives when requested
+                        data = (
+                            model_dump_fn(mode="json") if json_mode else model_dump_fn()
+                        )
+                    except TypeError:
+                        # Older signatures without mode param
+                        data = model_dump_fn()
+                    return convert(data)
+                finally:
+                    processing_ids.discard(obj_id)
             if callable(dict_fn):
+                obj_id = id(value)
+                if obj_id in processing_ids:
+                    return circular_marker
+                processing_ids.add(obj_id)
                 try:
-                    data = dict_fn()
-                except TypeError:
-                    data = dict_fn
-                return convert(data)
+                    try:
+                        data = dict_fn()
+                    except Exception:
+                        # If dict() method requires args or fails, fall through to other strategies
+                        raise
+                    return convert(data)
+                except Exception:
+                    # Will try other representations below
+                    pass
+                finally:
+                    processing_ids.discard(obj_id)
 
             # Third-party/common types handling in json mode
             if json_mode:
@@ -173,15 +269,29 @@ class UtilityMixin[T]:
 
             # Objects exposing to_dict()
             if hasattr(value, "to_dict") and callable(getattr(value, "to_dict")):
+                obj_id = id(value)
+                if obj_id in processing_ids:
+                    return circular_marker
+                processing_ids.add(obj_id)
                 try:
-                    return convert(value.to_dict())  # type: ignore
-                except TypeError:
-                    # Some to_dict expect args; fall back to __dict__
-                    pass
+                    try:
+                        return convert(value.to_dict())  # type: ignore
+                    except Exception:
+                        # Some to_dict expect args or may raise; fall back to __dict__
+                        pass
+                finally:
+                    processing_ids.discard(obj_id)
 
             # Fallback: use __dict__ if available, else string representation
             if hasattr(value, "__dict__"):
-                return {k: convert(v) for k, v in vars(value).items() if not k.startswith("__")}
+                obj_id = id(value)
+                if obj_id in processing_ids:
+                    return circular_marker
+                processing_ids.add(obj_id)
+                try:
+                    return {k: convert(v) for k, v in vars(value).items() if not k.startswith("__")}
+                finally:
+                    processing_ids.discard(obj_id)
 
             # Final fallback: string representation (ensures json serializable when needed)
             return str(value)
