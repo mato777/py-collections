@@ -1,9 +1,8 @@
 """Utility mixin for Collection class."""
 
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar
 
-if TYPE_CHECKING:
-    from py_collections.collection import Collection
+from ..base_collection import BaseCollection
 
 T = TypeVar("T")
 
@@ -11,7 +10,7 @@ T = TypeVar("T")
 class UtilityMixin[T]:
     """Mixin providing utility methods."""
 
-    def take(self, count: int) -> "Collection[T]":
+    def take(self, count: int) -> BaseCollection[T]:
         """
         Return a new collection with the specified number of items.
 
@@ -290,7 +289,11 @@ class UtilityMixin[T]:
                     return circular_marker
                 processing_ids.add(obj_id)
                 try:
-                    return {k: convert(v) for k, v in vars(value).items() if not k.startswith("__")}
+                    return {
+                        k: convert(v)
+                        for k, v in vars(value).items()
+                        if not k.startswith("__")
+                    }
                 finally:
                     processing_ids.discard(obj_id)
 

@@ -1,9 +1,8 @@
 """Basic operations mixin for Collection class."""
 
-from typing import TYPE_CHECKING, Any, TypeVar, Union
+from typing import Any, TypeVar, Union
 
-if TYPE_CHECKING:
-    from py_collections.collection import Collection
+from ..base_collection import BaseCollection
 
 T = TypeVar("T")
 
@@ -20,7 +19,7 @@ class BasicOperationsMixin[T]:
         """
         self._items.append(item)
 
-    def extend(self, items: Union[list[T], "Collection[T]"]) -> None:
+    def extend(self, items: Union[list[T], BaseCollection[T]]) -> None:
         """
         Extend the collection with items from a list or another collection.
 
@@ -40,16 +39,3 @@ class BasicOperationsMixin[T]:
             A list containing all items in the collection.
         """
         return self._items.copy()
-
-    def __len__(self) -> int:
-        """Return the number of items in the collection."""
-        return len(self._items)
-
-    def __iter__(self):
-        """
-        Return an iterator over the collection's items.
-
-        Returns:
-            An iterator that yields each item in the collection.
-        """
-        return iter(self._items)

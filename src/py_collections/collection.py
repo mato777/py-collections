@@ -2,6 +2,7 @@
 
 from typing import TypeVar
 
+from .base_collection import BaseCollection
 from .mixins import (
     BasicOperationsMixin,
     ElementAccessMixin,
@@ -16,13 +17,14 @@ T = TypeVar("T")
 
 
 class Collection[T](
-    BasicOperationsMixin,
-    ElementAccessMixin,
-    NavigationMixin,
-    TransformationMixin,
-    GroupingMixin,
-    RemovalMixin,
-    UtilityMixin,
+    BaseCollection[T],
+    BasicOperationsMixin[T],
+    ElementAccessMixin[T],
+    NavigationMixin[T],
+    TransformationMixin[T],
+    GroupingMixin[T],
+    RemovalMixin[T],
+    UtilityMixin[T],
 ):
     """
     A collection class that wraps a list and provides methods to manipulate it.
@@ -41,13 +43,4 @@ class Collection[T](
                If not provided, an empty list will be used.
     """
 
-    def __init__(self, items: list[T] | None = None):
-        self._items = items.copy() if items is not None else []
-
-    def __str__(self) -> str:
-        """Return a string representation of the collection."""
-        return f"Collection({self._items})"
-
-    def __repr__(self) -> str:
-        """Return a detailed string representation of the collection."""
-        return f"Collection({self._items})"
+    pass  # All functionality is inherited from BaseCollection and mixins

@@ -1,10 +1,9 @@
 """Transformation mixin for Collection class."""
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar
 
-if TYPE_CHECKING:
-    from py_collections.collection import Collection
+from ..base_collection import BaseCollection
 
 T = TypeVar("T")
 
@@ -12,7 +11,7 @@ T = TypeVar("T")
 class TransformationMixin[T]:
     """Mixin providing transformation methods."""
 
-    def map(self, func: Callable[[T], Any]) -> "Collection[Any]":
+    def map(self, func: Callable[[T], Any]) -> BaseCollection[Any]:
         """
         Apply a function to every item in the collection and return a new collection with the results.
 
@@ -33,7 +32,7 @@ class TransformationMixin[T]:
         mapped_items = [func(item) for item in self._items]
         return Collection(mapped_items)
 
-    def pluck(self, key: str, value_key: str | None = None) -> "Collection[Any]":
+    def pluck(self, key: str, value_key: str | None = None) -> BaseCollection[Any]:
         """
         Extract values from a collection of items based on a key or attribute.
 
@@ -104,7 +103,7 @@ class TransformationMixin[T]:
 
         return Collection(plucked_items)
 
-    def filter(self, predicate: Callable[[T], bool]) -> "Collection[T]":
+    def filter(self, predicate: Callable[[T], bool]) -> BaseCollection[T]:
         """
         Filter the collection based on a predicate function.
 
@@ -120,7 +119,7 @@ class TransformationMixin[T]:
         filtered_items = [item for item in self._items if predicate(item)]
         return Collection(filtered_items)
 
-    def reverse(self) -> "Collection[T]":
+    def reverse(self) -> BaseCollection[T]:
         """
         Return a new collection with the items reversed in order.
 
@@ -132,7 +131,7 @@ class TransformationMixin[T]:
         reversed_items = self._items[::-1]
         return Collection(reversed_items)
 
-    def clone(self) -> "Collection[T]":
+    def clone(self) -> BaseCollection[T]:
         """
         Return a new collection with the same items.
 

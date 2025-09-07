@@ -402,3 +402,24 @@ class TestPluck:
         result = users.pluck("address.city")
         assert result.all() == ["New York", None, None]
         assert isinstance(result, Collection)
+
+    def test_pluck_missing_attribute(self):
+        """Test pluck when object doesn't have the requested attribute."""
+
+        class User:
+            def __init__(self, name, age):
+                self.name = name
+                self.age = age
+                # Note: no 'city' attribute
+
+        users = Collection(
+            [
+                User("Alice", 25),
+                User("Bob", 30),
+            ]
+        )
+
+        # This should return None for missing attributes
+        result = users.pluck("city")
+        assert result.all() == [None, None]
+        assert isinstance(result, Collection)

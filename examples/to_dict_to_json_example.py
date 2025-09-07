@@ -9,11 +9,13 @@ from py_collections import Collection
 
 
 def main():
-    data = Collection([
-        {"name": "Alice", "age": 30},
-        (1, 2, 3),
-        {"tags": {"python", "collections"}},
-    ])
+    data = Collection(
+        [
+            {"name": "Alice", "age": 30},
+            (1, 2, 3),
+            {"tags": {"python", "collections"}},
+        ]
+    )
 
     # Convert to plain Python structures
     structure = data.to_dict()
@@ -29,4 +31,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
