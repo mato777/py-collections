@@ -1,9 +1,10 @@
 """Grouping mixin for Collection class."""
 
 from collections.abc import Callable
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
-from ..base_collection import BaseCollection
+if TYPE_CHECKING:
+    from ..collection import Collection
 
 T = TypeVar("T")
 
@@ -13,7 +14,7 @@ class GroupingMixin[T]:
 
     def group_by(
         self, key: str | Callable[[T], Any] | None = None
-    ) -> dict[Any, BaseCollection[T]]:
+    ) -> dict[Any, "Collection[T]"]:
         """
         Group the collection's items by a given key or callback function.
 
@@ -23,7 +24,7 @@ class GroupingMixin[T]:
                  If None, groups by the item itself.
 
         Returns:
-            A dictionary where keys are the grouping values and values are BaseCollection
+            A dictionary where keys are the grouping values and values are Collection
             instances containing the grouped items.
 
         Examples:
@@ -70,7 +71,7 @@ class GroupingMixin[T]:
 
         return grouped
 
-    def chunk(self, size: int) -> list[BaseCollection[T]]:
+    def chunk(self, size: int) -> list["Collection[T]"]:
         """
         Split the collection into smaller collections of the specified size.
 

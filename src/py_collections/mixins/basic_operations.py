@@ -1,8 +1,9 @@
 """Basic operations mixin for Collection class."""
 
-from typing import Any, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar, Union
 
-from ..base_collection import BaseCollection
+if TYPE_CHECKING:
+    from ..collection import Collection
 
 T = TypeVar("T")
 
@@ -19,7 +20,7 @@ class BasicOperationsMixin[T]:
         """
         self._items.append(item)
 
-    def extend(self, items: Union[list[T], BaseCollection[T]]) -> None:
+    def extend(self, items: Union[list[T], "Collection[T]"]) -> None:
         """
         Extend the collection with items from a list or another collection.
 

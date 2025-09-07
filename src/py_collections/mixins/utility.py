@@ -1,8 +1,9 @@
 """Utility mixin for Collection class."""
 
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
-from ..base_collection import BaseCollection
+if TYPE_CHECKING:
+    from ..collection import Collection
 
 T = TypeVar("T")
 
@@ -10,7 +11,7 @@ T = TypeVar("T")
 class UtilityMixin[T]:
     """Mixin providing utility methods."""
 
-    def take(self, count: int) -> BaseCollection[T]:
+    def take(self, count: int) -> "Collection[T]":
         """
         Return a new collection with the specified number of items.
 
