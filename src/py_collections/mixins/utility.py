@@ -112,7 +112,7 @@ class UtilityMixin[T]:
             # Map keys to JSON-safe strings with best-effort type-aware formatting
             if key is None:
                 return "null"
-            if isinstance(key, (bool, int, float, str)):
+            if isinstance(key, bool | int | float | str):
                 return str(key)
             try:
                 import datetime as _dt  # type: ignore
@@ -122,7 +122,7 @@ class UtilityMixin[T]:
                 _dt = None  # type: ignore
                 _decimal = None  # type: ignore
                 _uuid = None  # type: ignore
-            if _dt and isinstance(key, (_dt.datetime, _dt.date, _dt.time)):
+            if _dt and isinstance(key, _dt.datetime | _dt.date | _dt.time):
                 return key.isoformat()
             if _uuid and isinstance(key, _uuid.UUID):
                 return str(key)
@@ -130,11 +130,11 @@ class UtilityMixin[T]:
                 # Keep decimal textual representation to avoid precision loss in keys
                 return str(key)
             # Fallback: include type name to reduce collision chance
-            return f"<{type(key).__name__}:{repr(key)}>"
+            return f"<{type(key).__name__}:{key!r}>"
 
-        def convert(value: "Any") -> "Any":
+        def convert(value: "Any") -> "Any":  # noqa: PLR0912
             # Primitives
-            if value is None or isinstance(value, (bool, int, float, str)):
+            if value is None or isinstance(value, bool | int | float | str):
                 return value
 
             # Avoid circular import: import here
@@ -152,7 +152,7 @@ class UtilityMixin[T]:
                     processing_ids.discard(obj_id)
 
             # Built-in containers
-            if isinstance(value, (list, tuple)):
+            if isinstance(value, list | tuple):
                 obj_id = id(value)
                 if obj_id in processing_ids:
                     return circular_marker
@@ -178,7 +178,7 @@ class UtilityMixin[T]:
                 processing_ids.add(obj_id)
                 try:
                     if json_mode:
-                        result: dict[str, "Any"] = {}
+                        result: dict[str, Any] = {}
                         for k, v in value.items():
                             key_str = safe_json_key(k)
                             if key_str in result:
@@ -194,7 +194,7 @@ class UtilityMixin[T]:
 
             # Dataclasses
             try:
-                from dataclasses import is_dataclass, asdict  # type: ignore
+                from dataclasses import asdict, is_dataclass  # type: ignore
             except Exception:  # pragma: no cover - defensive
                 is_dataclass = None  # type: ignore
                 asdict = None  # type: ignore
@@ -259,7 +259,7 @@ class UtilityMixin[T]:
                     _decimal = None  # type: ignore
                     _uuid = None  # type: ignore
 
-                if _dt and isinstance(value, (_dt.datetime, _dt.date, _dt.time)):
+                if _dt and isinstance(value, _dt.datetime | _dt.date | _dt.time):
                     # Use ISO format for JSON
                     return value.isoformat()
                 if _decimal and isinstance(value, _decimal.Decimal):
@@ -269,7 +269,7 @@ class UtilityMixin[T]:
                     return str(value)
 
             # Objects exposing to_dict()
-            if hasattr(value, "to_dict") and callable(getattr(value, "to_dict")):
+            if hasattr(value, "to_dict") and callable(value.to_dict):
                 obj_id = id(value)
                 if obj_id in processing_ids:
                     return circular_marker

@@ -6,6 +6,7 @@ from .mixins import (
     BasicOperationsMixin,
     ElementAccessMixin,
     GroupingMixin,
+    MathOperationsMixin,
     NavigationMixin,
     RemovalMixin,
     TransformationMixin,
@@ -23,6 +24,7 @@ class Collection[T](
     GroupingMixin[T],
     RemovalMixin[T],
     UtilityMixin[T],
+    MathOperationsMixin[T],
 ):
     """
     A collection class that wraps a list and provides methods to manipulate it.
@@ -35,6 +37,7 @@ class Collection[T](
     - GroupingMixin: group_by, chunk
     - RemovalMixin: remove, remove_one
     - UtilityMixin: take, dump_me, dump_me_and_die
+    - MathOperationsMixin: sum
 
     Args:
         items: Optional list of items to initialize the collection with.
@@ -71,3 +74,48 @@ class Collection[T](
             An iterator that yields each item in the collection.
         """
         return iter(self._items)
+
+    def __eq__(self, other) -> bool:
+        """
+        Check if two collections are equal.
+
+        Args:
+            other: Another collection or object to compare with.
+
+        Returns:
+            True if both collections contain the same items in the same order, False otherwise.
+        """
+        if not isinstance(other, Collection):
+            return False
+        return self._items == other._items
+
+    def __getitem__(self, index):
+        """
+        Get an item from the collection by index.
+
+        Args:
+            index: The index of the item to retrieve.
+
+        Returns:
+            The item at the specified index.
+
+        Raises:
+            IndexError: If the index is out of range.
+        """
+        return self._items[index]
+
+    def __add__(self, other):
+        """
+        Add two collections together.
+
+        Args:
+            other: Another collection to add to this one.
+
+        Returns:
+            A new Collection containing all items from both collections.
+        """
+        if not isinstance(other, Collection):
+            raise TypeError(f"Can only add Collection to Collection, not {type(other)}")
+
+        new_items = self._items + other._items
+        return Collection(new_items)
