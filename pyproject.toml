@@ -1,6 +1,6 @@
 [project]
 name = "py-collections"
-version = "0.1.0"
+version = "0.1.3"
 description = "A Python collections library providing enhanced collection types with additional functionality"
 readme = "README.md"
 license = {text = "MIT"}
@@ -35,6 +35,13 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
     "Typing :: Typed",
 ]
+
+[project.urls]
+Homepage = "https://github.com/mato777/py-collections"
+Repository = "https://github.com/mato777/py-collections"
+Documentation = "https://github.com/mato777/py-collections#readme"
+"Bug Tracker" = "https://github.com/mato777/py-collections/issues"
+"Source Code" = "https://github.com/mato777/py-collections"
 
 [project.optional-dependencies]
 dev = [
