@@ -161,7 +161,7 @@ Each mixin provides a focused set of related functionality:
 - Enhanced collection types with additional utility methods
 - **Modular mixin architecture** for maintainable code
 - Type-safe implementations with full generic support
-- **100% test coverage** - All code paths tested
+- almost **100% test coverage** - All code paths tested
 - Modern Python features (3.13+)
 - Specialized `CollectionMap` for working with grouped data
 - Code quality tools: Ruff (linting + formatting), MyPy (type checking)

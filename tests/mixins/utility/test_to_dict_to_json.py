@@ -264,3 +264,157 @@ class TestToDictToJson:
         result = data.to_dict()
         assert len(result) == 1
         assert isinstance(result[0], str)  # Should fall back to string representation
+
+    def test_to_dict_circular_reference_in_containers(self):
+        """Test circular reference detection in built-in containers."""
+        # Create circular reference in list
+        a = [1, 2]
+        b = [3, 4]
+        a.append(b)
+        b.append(a)
+
+        data = Collection([a])
+        result = data.to_dict()
+        # Should detect circular reference and mark it
+        assert result == [[1, 2, [3, 4, "[Circular]"]]]
+
+    def test_to_dict_circular_reference_in_sets(self):
+        """Test circular reference detection in sets."""
+        # Note: sets can't contain mutable objects, so we'll test with a different approach
+        # Create a list that references itself
+        circular_list = [1, 2]
+        circular_list.append(circular_list)
+
+        data = Collection([circular_list])
+        result = data.to_dict()
+        # Should detect circular reference
+        assert result == [[1, 2, "[Circular]"]]
+
+    def test_to_dict_circular_reference_in_dicts(self):
+        """Test circular reference detection in dictionaries."""
+        # Create circular reference in dict
+        a = {"key1": "value1"}
+        b = {"key2": "value2"}
+        a["circular"] = b
+        b["circular"] = a
+
+        data = Collection([a])
+        result = data.to_dict()
+        # Should detect circular reference
+        assert result == [{"key1": "value1", "circular": {"key2": "value2", "circular": "[Circular]"}}]
+
+    def test_to_dict_dataclass_without_circular_reference(self):
+        """Test dataclass conversion without circular references."""
+        from dataclasses import dataclass
+
+        @dataclass
+        class Node:
+            value: int
+            name: str
+
+        node1 = Node(1, "first")
+        node2 = Node(2, "second")
+
+        data = Collection([node1, node2])
+        result = data.to_dict()
+        assert result == [{"value": 1, "name": "first"}, {"value": 2, "name": "second"}]
+
+    def test_to_dict_pydantic_without_circular_reference(self):
+        """Test Pydantic model conversion without circular references."""
+        try:
+            from pydantic import BaseModel
+        except ImportError:
+            pytest.skip("Pydantic not available")
+
+        class Node(BaseModel):
+            value: int
+            name: str
+
+        node1 = Node(value=1, name="first")
+        node2 = Node(value=2, name="second")
+
+        data = Collection([node1, node2])
+        result = data.to_dict()
+        assert result == [{"value": 1, "name": "first"}, {"value": 2, "name": "second"}]
+
+    def test_to_dict_pydantic_v1_dict_method_exception_handling(self):
+        """Test Pydantic v1 dict() method that raises exception."""
+        try:
+            from pydantic import BaseModel
+        except ImportError:
+            pytest.skip("Pydantic not available")
+
+        # Create a mock that simulates Pydantic v1 dict() method that fails
+        class FailingPydanticV1:
+            def __init__(self, value):
+                self.value = value
+
+            def dict(self):
+                raise ValueError("dict() method failed")
+
+        data = Collection([FailingPydanticV1("test")])
+        result = data.to_dict()
+        # Should fall back to __dict__ representation
+        assert result == [{"value": "test"}]
+
+    def test_to_dict_objects_with_failing_to_dict_method_exception_handling(self):
+        """Test objects with to_dict method that raises exception and falls back."""
+
+        class FailingToDictObject:
+            def __init__(self, value):
+                self.value = value
+
+            def to_dict(self):
+                raise ValueError("to_dict method failed")
+
+        data = Collection([FailingToDictObject("test")])
+        result = data.to_dict()
+        # Should fall back to __dict__ representation
+        assert result == [{"value": "test"}]
+
+    def test_to_dict_circular_reference_in_objects_with_dict(self):
+        """Test circular reference detection in objects with __dict__."""
+
+        class Node:
+            def __init__(self, value):
+                self.value = value
+                self.next_node = None
+
+        # Create circular reference
+        node1 = Node(1)
+        node2 = Node(2)
+        node1.next_node = node2
+        node2.next_node = node1
+
+        data = Collection([node1])
+        result = data.to_dict()
+        # Should detect circular reference
+        assert result == [{"value": 1, "next_node": {"value": 2, "next_node": "[Circular]"}}]
+
+    def test_to_dict_edge_cases(self):
+        """Test various edge cases for better coverage."""
+        # Test with empty collection
+        empty = Collection()
+        assert empty.to_dict() == []
+
+        # Test with None values
+        data = Collection([None, {"key": None}])
+        result = data.to_dict()
+        assert result == [None, {"key": None}]
+
+        # Test with complex nested structures
+        complex_data = Collection([
+            {
+                "list": [1, 2, {"nested": "value"}],
+                "tuple": (1, 2, 3),
+                "set": {1, 2, 3},
+                "dict": {"a": 1, "b": 2}
+            }
+        ])
+        result = complex_data.to_dict()
+        assert len(result) == 1
+        assert isinstance(result[0], dict)
+        assert "list" in result[0]
+        assert "tuple" in result[0]
+        assert "set" in result[0]
+        assert "dict" in result[0]
