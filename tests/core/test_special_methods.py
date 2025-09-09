@@ -98,7 +98,7 @@ class TestCollectionSpecialMethods:
         assert collection != [1, 2, 3]
         assert collection != "hello"
         assert collection != 42
-        assert collection != None
+        assert collection is not None
 
     def test_add_two_collections(self):
         """Test __add__ with two collections."""
@@ -186,7 +186,7 @@ class TestCollectionSpecialMethods:
         collection2 = Collection([4, 5, 6])
         original1 = collection1._items.copy()
         original2 = collection2._items.copy()
-        result = collection1 + collection2
+        collection1 + collection2
         assert collection1._items == original1
         assert collection2._items == original2
 

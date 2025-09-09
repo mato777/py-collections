@@ -301,7 +301,9 @@ class TestToDictToJson:
         data = Collection([a])
         result = data.to_dict()
         # Should detect circular reference
-        assert result == [{"key1": "value1", "circular": {"key2": "value2", "circular": "[Circular]"}}]
+        assert result == [
+            {"key1": "value1", "circular": {"key2": "value2", "circular": "[Circular]"}}
+        ]
 
     def test_to_dict_dataclass_without_circular_reference(self):
         """Test dataclass conversion without circular references."""
@@ -389,7 +391,9 @@ class TestToDictToJson:
         data = Collection([node1])
         result = data.to_dict()
         # Should detect circular reference
-        assert result == [{"value": 1, "next_node": {"value": 2, "next_node": "[Circular]"}}]
+        assert result == [
+            {"value": 1, "next_node": {"value": 2, "next_node": "[Circular]"}}
+        ]
 
     def test_to_dict_edge_cases(self):
         """Test various edge cases for better coverage."""
@@ -403,14 +407,16 @@ class TestToDictToJson:
         assert result == [None, {"key": None}]
 
         # Test with complex nested structures
-        complex_data = Collection([
-            {
-                "list": [1, 2, {"nested": "value"}],
-                "tuple": (1, 2, 3),
-                "set": {1, 2, 3},
-                "dict": {"a": 1, "b": 2}
-            }
-        ])
+        complex_data = Collection(
+            [
+                {
+                    "list": [1, 2, {"nested": "value"}],
+                    "tuple": (1, 2, 3),
+                    "set": {1, 2, 3},
+                    "dict": {"a": 1, "b": 2},
+                }
+            ]
+        )
         result = complex_data.to_dict()
         assert len(result) == 1
         assert isinstance(result[0], dict)
